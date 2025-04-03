@@ -33,52 +33,156 @@ Stack Builder Installation Directory: C:\Program Files\PostgreSQL\17
 Installation Log: C:\Users\nayou\AppData\Local\Temp\install-postgresql.log
 
 3. DB설계
+-----------------------------------
+|          Users                 |
+-----------------------------------
+| + user_id: SERIAL (PK)         |
+| + username: VARCHAR(50)        |
+| + password_hash: TEXT          |
+| + email: VARCHAR(100) (UNIQUE) |
+| + role: VARCHAR(20)            |
+| + created_at: TIMESTAMP        |
+-----------------------------------
+                │
+                │  (1:N)
+                ▼
+-----------------------------------
+|          Devices               |
+-----------------------------------
+| + device_id: SERIAL (PK)       |
+| + user_id: INT (FK)            |
+| + name: VARCHAR(100)           |
+| + type: VARCHAR(50)            |
+| + location: TEXT               |
+| + created_at: TIMESTAMP        |
+-----------------------------------
+                │
+                │  (1:N)
+                ▼
+-----------------------------------
+|          Sensors               |
+-----------------------------------
+| + sensor_id: SERIAL (PK)       |
+| + device_id: INT (FK)          |
+| + sensor_type: VARCHAR(50)     |
+| + unit: VARCHAR(20)            |
+| + created_at: TIMESTAMP        |
+-----------------------------------
+                │
+                │  (1:N)
+                ▼
+-----------------------------------
+|          Sensor_Data           |
+-----------------------------------
+| + data_id: SERIAL (PK)         |
+| + sensor_id: INT (FK)          |
+| + value: FLOAT                 |
+| + timestamp: TIMESTAMP         |
+-----------------------------------
+                │
+                │  (1:N)
+                ▼
+-----------------------------------
+|          Alerts                |
+-----------------------------------
+| + alert_id: SERIAL (PK)        |
+| + device_id: INT (FK)          |
+| + message: TEXT                |
+| + severity: VARCHAR(20)        |
+| + triggered_at: TIMESTAMP      |
+-----------------------------------
+
+4. DB, TABLE생성 및 DATA생성
+
+CREATE DATABASE energy_monitor;
+
 BEGIN;
 
--- 신재생 에너지 데이터 테이블 (energy_data)
-CREATE TABLE energy_data (
-    id SERIAL PRIMARY KEY,                 -- 고유 ID
-    sensor_name TEXT NOT NULL,             -- 센서 이름 (예: 태양광, 풍력 등)
-    energy_value DECIMAL NOT NULL,         -- 측정된 에너지 값 (kWh 또는 W)
-    unit TEXT DEFAULT 'kWh',               -- 단위 (기본값 kWh)
-    recorded_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP -- 측정 시간
-);
-
--- 사용자 테이블 (users)
-CREATE TABLE users (
-    id SERIAL PRIMARY KEY,
-    username TEXT UNIQUE NOT NULL,
+-- 사용자 테이블 (Users)
+CREATE TABLE Users (
+    user_id SERIAL PRIMARY KEY,
+    username VARCHAR(50) NOT NULL,
     password_hash TEXT NOT NULL,
-    email TEXT UNIQUE NOT NULL,
-    role TEXT DEFAULT 'user', -- 'admin', 'user' 등의 역할
-    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+    email VARCHAR(100) UNIQUE NOT NULL,
+    role VARCHAR(20) DEFAULT 'user',
+    created_at TIMESTAMP DEFAULT now()
 );
 
---시스템 로그 테이블 (system_logs)
-CREATE TABLE system_logs (
-    id SERIAL PRIMARY KEY,
-    log_type TEXT NOT NULL,    -- 'ERROR', 'INFO', 'WARNING' 등
-    message TEXT NOT NULL,     -- 로그 메시지
-    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+-- 장치 테이블 (Devices)
+CREATE TABLE Devices (
+    device_id SERIAL PRIMARY KEY,
+    user_id INT REFERENCES Users(user_id) ON DELETE CASCADE,
+    name VARCHAR(100) NOT NULL,
+    type VARCHAR(50) NOT NULL,
+    location TEXT,
+    created_at TIMESTAMP DEFAULT now()
 );
 
--- 신재생 에너지 데이터 샘플
-INSERT INTO energy_data (sensor_name, energy_value) VALUES
-('태양광', 125.5),
-('풍력', 230.8);
+-- 센서 테이블 (Sensors)
+CREATE TABLE Sensors (
+    sensor_id SERIAL PRIMARY KEY,
+    device_id INT REFERENCES Devices(device_id) ON DELETE CASCADE,
+    sensor_type VARCHAR(50) NOT NULL,
+    unit VARCHAR(20),
+    created_at TIMESTAMP DEFAULT now()
+);
 
--- 사용자 데이터 샘플
-INSERT INTO users (username, password_hash, email, role) VALUES
+-- 센서 데이터 테이블 (Sensor_Data)
+CREATE TABLE Sensor_Data (
+    data_id SERIAL PRIMARY KEY,
+    sensor_id INT REFERENCES Sensors(sensor_id) ON DELETE CASCADE,
+    value FLOAT NOT NULL,
+    timestamp TIMESTAMP DEFAULT now()
+);
+
+-- 경고 로그 테이블 (Alerts)
+CREATE TABLE Alerts (
+    alert_id SERIAL PRIMARY KEY,
+    device_id INT REFERENCES Devices(device_id) ON DELETE CASCADE,
+    message TEXT NOT NULL,
+    severity VARCHAR(20) NOT NULL,
+    triggered_at TIMESTAMP DEFAULT now()
+);
+
+-- 사용자 데이터 (Users)
+INSERT INTO Users (username, password_hash, email, role) VALUES
 ('admin', 'hashedpassword123', 'admin@example.com', 'admin'),
-('user1', 'hashedpassword456', 'user1@example.com', 'user');
+('user1', 'hashedpassword456', 'user1@example.com', 'user'),
+('user2', 'hashedpassword789', 'user2@example.com', 'user'),
+('user3', 'hashedpasswordabc', 'user3@example.com', 'user'),
+('user4', 'hashedpasswordxyz', 'user4@example.com', 'user');
 
--- 시스템 로그 샘플
-INSERT INTO system_logs (log_type, message) VALUES
-('INFO', '시스템이 정상적으로 시작됨');
+-- 장치 데이터 (Devices)
+INSERT INTO Devices (user_id, name, type, location) VALUES
+(1, '태양광 인버터', 'solar_inverter', '서울'),
+(2, '풍력 터빈', 'wind_turbine', '부산'),
+(3, '배터리 저장 장치', 'battery_storage', '대구'),
+(4, '수력 발전기', 'hydro_generator', '광주'),
+(5, '전력 모니터링 시스템', 'power_monitor', '대전');
+
+-- 센서 데이터 (Sensors)
+INSERT INTO Sensors (device_id, sensor_type, unit) VALUES
+(1, '전압 센서', 'V'),
+(2, '풍속 센서', 'm/s'),
+(3, '전류 센서', 'A'),
+(4, '수위 센서', 'cm'),
+(5, '온도 센서', '°C');
+
+-- 센서 측정 데이터 (Sensor_Data)
+INSERT INTO Sensor_Data (sensor_id, value, timestamp) VALUES
+(1, 220.5, '2025-04-03 10:00:00'),
+(2, 15.3, '2025-04-03 10:05:00'),
+(3, 32.7, '2025-04-03 10:10:00'),
+(4, 75.2, '2025-04-03 10:15:00'),
+(5, 27.8, '2025-04-03 10:20:00');
+
+-- 경고 로그 데이터 (Alerts)
+INSERT INTO Alerts (device_id, message, severity, triggered_at) VALUES
+(1, '전압이 비정상적으로 높습니다.', 'HIGH', '2025-04-03 10:30:00'),
+(2, '풍속이 위험 수준입니다.', 'CRITICAL', '2025-04-03 10:35:00'),
+(3, '배터리 전류 이상 감지.', 'MEDIUM', '2025-04-03 10:40:00'),
+(4, '수위 센서 데이터 오류 발생.', 'LOW', '2025-04-03 10:45:00'),
+(5, '온도 센서가 50°C 이상 감지.', 'HIGH', '2025-04-03 10:50:00');
 
 COMMIT;
 
--- 조회
-SELECT * FROM energy_data;
-SELECT * FROM users;
-SELECT * FROM system_logs;
