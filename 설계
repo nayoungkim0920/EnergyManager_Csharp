@@ -31,3 +31,54 @@ Command Line Tools Installation Directory: C:\Program Files\PostgreSQL\17
 pgAdmin4 Installation Directory: C:\Program Files\PostgreSQL\17\pgAdmin 4
 Stack Builder Installation Directory: C:\Program Files\PostgreSQL\17
 Installation Log: C:\Users\nayou\AppData\Local\Temp\install-postgresql.log
+
+3. DB설계
+BEGIN;
+
+-- 신재생 에너지 데이터 테이블 (energy_data)
+CREATE TABLE energy_data (
+    id SERIAL PRIMARY KEY,                 -- 고유 ID
+    sensor_name TEXT NOT NULL,             -- 센서 이름 (예: 태양광, 풍력 등)
+    energy_value DECIMAL NOT NULL,         -- 측정된 에너지 값 (kWh 또는 W)
+    unit TEXT DEFAULT 'kWh',               -- 단위 (기본값 kWh)
+    recorded_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP -- 측정 시간
+);
+
+-- 사용자 테이블 (users)
+CREATE TABLE users (
+    id SERIAL PRIMARY KEY,
+    username TEXT UNIQUE NOT NULL,
+    password_hash TEXT NOT NULL,
+    email TEXT UNIQUE NOT NULL,
+    role TEXT DEFAULT 'user', -- 'admin', 'user' 등의 역할
+    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+);
+
+--시스템 로그 테이블 (system_logs)
+CREATE TABLE system_logs (
+    id SERIAL PRIMARY KEY,
+    log_type TEXT NOT NULL,    -- 'ERROR', 'INFO', 'WARNING' 등
+    message TEXT NOT NULL,     -- 로그 메시지
+    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+);
+
+-- 신재생 에너지 데이터 샘플
+INSERT INTO energy_data (sensor_name, energy_value) VALUES
+('태양광', 125.5),
+('풍력', 230.8);
+
+-- 사용자 데이터 샘플
+INSERT INTO users (username, password_hash, email, role) VALUES
+('admin', 'hashedpassword123', 'admin@example.com', 'admin'),
+('user1', 'hashedpassword456', 'user1@example.com', 'user');
+
+-- 시스템 로그 샘플
+INSERT INTO system_logs (log_type, message) VALUES
+('INFO', '시스템이 정상적으로 시작됨');
+
+COMMIT;
+
+-- 조회
+SELECT * FROM energy_data;
+SELECT * FROM users;
+SELECT * FROM system_logs;
