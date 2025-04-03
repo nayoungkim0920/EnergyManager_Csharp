@@ -1,23 +1,22 @@
 [프로젝트명 : 신재생 에너지 데이터 모니터링 시스템]
 
-1. 구성 요소
-1-1. 백엔드 (ASP.NET Core Web API)
-1) 신재생 에너지 데이터 (예: 태양광, 풍력) 수집 및 저장
-2) 클라이언트(WPF)에서 요청하는 데이터를 JSON 형태로 제공
-3) PostgreSQL 데이터베이스와 연결
-1-2. 프론트엔드 (WPF)
-1) 실시간으로 데이터를 시각화 (예: 그래프, 차트)
-2) 백엔드에서 데이터를 받아와 UI에 표시
-1-3. 데이터베이스 (PostgreSQL)
-1) 센서 데이터 저장
-2) 로그 및 설정 값 관리
+1. 프로젝트설계계
+\--EnergySystem (솔루션)
+　|-EnergySystem.WPF (백엔드 WPF 애플리케이션)
+　|-EnergySystem.API (ASP.NET Core Minimal API)
+　|-EnergySystem.Blazor (프론트엔드 대시보드)
+　|-EnergySystem.Data (공통 데이터 모델 & EF Core)
 
 2. 툴설치
 2-1. PostgreSQL설치
 https://www.enterprisedb.com/downloads/postgres-postgresql-downloads
 PostgreSQL Version 17.4 Windows x86-64
+
 https://www.enterprisedb.com/postgresql-tutorial-resources-training-1?uuid=69f95902-b451-4735-b7e4-1b62209d4dfd&campaignId=postgres_rc_17
 postgresql-17.4-1-windows-x64.exe
+
+https://dotnet.microsoft.com/ko-kr/download/dotnet/thank-you/sdk-8.0.310-windows-x64-installer
+dotnet-sdk-8.0.310-win-x64.exe
 
 Installation Summary
 Installation Directory: C:\Program Files\PostgreSQL\17
@@ -31,6 +30,10 @@ Command Line Tools Installation Directory: C:\Program Files\PostgreSQL\17
 pgAdmin4 Installation Directory: C:\Program Files\PostgreSQL\17\pgAdmin 4
 Stack Builder Installation Directory: C:\Program Files\PostgreSQL\17
 Installation Log: C:\Users\nayou\AppData\Local\Temp\install-postgresql.log
+
+2-2. .NET 8.0 SDK
+https://dotnet.microsoft.com/en-us/download/dotnet/thank-you/sdk-8.0.407-windows-x86-installer
+dotnet-sdk-8.0.407-win-x86.exe
 
 3. DB설계
 -----------------------------------
@@ -185,4 +188,9 @@ INSERT INTO Alerts (device_id, message, severity, triggered_at) VALUES
 (5, '온도 센서가 50°C 이상 감지.', 'HIGH', '2025-04-03 10:50:00');
 
 COMMIT;
+
+4. 개발
+4-1. EnergySystem.Data (공통 데이터 모델 & EF Core)
+Class Library 생성
+
 
