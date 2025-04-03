@@ -191,6 +191,22 @@ COMMIT;
 
 4. 개발
 4-1. EnergySystem.Data (공통 데이터 모델 & EF Core)
-Class Library 생성
+1) Class Library 생성
+C:\Windows\System32>dotnet --list-sdks
+8.0.310 [C:\Program Files\dotnet\sdk]
+9.0.201 [C:\Program Files\dotnet\sdk]
 
+C:\Windows\System32>cd C:\wpfProject\EnergySystem
+C:\wpfProject\EnergySystem>dotnet new classlib -n EnergySystem.Data --framework net8.0
+"클래스 라이브러리" 템플릿이 성공적으로 생성되었습니다.
+생성 후 작업 처리 중...
+C:\wpfProject\EnergySystem\EnergySystem.Data\EnergySystem.Data.csproj 복원 중:
+복원에 성공했습니다.
+C:\wpfProject\EnergySystem>
+C:\wpfProject\EnergySystem>dotnet sln add EnergySystem.Data/EnergySystem.Data.csproj
+'EnergySystem.Data\EnergySystem.Data.csproj' 프로젝트가 솔루션에 추가되었습니다.
 
+2) NuGet 패키지 설치
+Microsoft.EntityFrameworkCore 9.0.3
+Microsoft.EntityFrameworkCore.Design 9.0.3
+Aspire.Npgsql.EntityFrameworkCore.PostgreSQL 9.1.0
